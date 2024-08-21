@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { errorToast } from './toast';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_SOME_KEY || 'https://hsbc-3eid.onrender.com';
+console.log('using API_URL', API_URL);
 
 function bearerToken(token) {
   return {
