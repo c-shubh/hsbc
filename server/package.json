@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "nodemon ./src/index.ts",
-    "clear-and-seed": "ts-node src/initialSeed.ts"
+    "clear-and-seed": "ts-node src/initialSeed.ts",
+    "build": "tsc",
+    "prisma-setup": "prisma migrate deploy",
+    "start": "node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -19,9 +22,7 @@
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
-    "yup": "^1.4.0"
-  },
-  "devDependencies": {
+    "yup": "^1.4.0",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
