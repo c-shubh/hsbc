@@ -18,6 +18,111 @@ app.get("/", (req, res) => {
   res.send("works");
 });
 
+// MARK: /analytics
+
+app.get("/analytics/overview", async (req, res) => {
+  try {
+    const [
+      totalAmountResult,
+      totalFraudulentTransactionsResult,
+      totalNonFraudulentTransactionsResult,
+      averageTransactionAmountResult,
+      uniqueMerchants,
+      uniqueCustomers,
+      transactionsByCategory,
+      averageAmountByCategory,
+    ] = await db.$transaction([
+      // total amount processed
+      db.transaction.aggregate({
+        _sum: {
+          amount: true,
+        },
+      }),
+
+      // number of fraudulent transactions
+      db.transaction.count({
+        where: { fraud: true },
+      }),
+
+      // number of non-fraudulent transactions
+      db.transaction.count({
+        where: { fraud: false },
+      }),
+
+      // average transaction amount
+      db.transaction.aggregate({
+        _avg: {
+          amount: true,
+        },
+      }),
+
+      // number of unique merchants
+      db.transaction.groupBy({
+        by: "merchant",
+        _count: {
+          merchant: true,
+        },
+        orderBy: { merchant: "asc" },
+      }),
+
+      // number of unique customers
+      db.transaction.groupBy({
+        by: "customer",
+        _count: {
+          customer: true,
+        },
+        orderBy: { customer: "asc" },
+      }),
+
+      // number of transactions per category
+      db.transaction.groupBy({
+        by: "category",
+        orderBy: { category: "asc" },
+        _count: {
+          category: true,
+        },
+      }),
+
+      // average amount per category
+      db.transaction.groupBy({
+        by: "category",
+        orderBy: { category: "asc" },
+        _avg: {
+          amount: true,
+        },
+      }),
+    ]);
+
+    const totalUniqueMerchants = uniqueMerchants.length;
+    const totalUniqueCustomers = uniqueCustomers.length;
+    const summary = {
+      totalTransactions:
+        totalFraudulentTransactionsResult +
+        totalNonFraudulentTransactionsResult,
+      totalAmount: totalAmountResult._sum.amount || 0,
+      totalFraudulentTransactions: totalFraudulentTransactionsResult,
+      totalNonFraudulentTransactions: totalNonFraudulentTransactionsResult,
+      averageTransactionAmount: averageTransactionAmountResult._avg.amount || 0,
+      totalUniqueMerchants,
+      totalUniqueCustomers,
+      transactionsByCategory: transactionsByCategory.map((txns) => ({
+        category: txns.category,
+        count: (txns._count! as any).category,
+      })),
+      averageAmountByCategory: averageAmountByCategory.map((amts) => ({
+        category: amts.category,
+        amount: (amts._avg! as any).amount,
+      })),
+    };
+    res.json(summary);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// MARK: /transactions
+
 // get transactions based on filters
 app.get("/transactions", async (req, res) => {
   try {
