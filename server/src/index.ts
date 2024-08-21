@@ -256,6 +256,35 @@ app.get("/analytics/merchant-performance", async (req, res) => {
   }
 });
 
+app.get("/analytics/category-breakdown", async (req, res) => {
+  try {
+    const categoryBreakdown = await db.transaction.groupBy({
+      by: ["category"],
+      _count: {
+        id: true,
+      },
+      _sum: {
+        amount: true,
+      },
+      _avg: {
+        amount: true,
+      },
+    });
+
+    const breakdownData = categoryBreakdown.map((category) => ({
+      category: category.category,
+      totalTransactions: category._count.id,
+      totalAmount: category._sum.amount || 0,
+      averageAmount: category._avg.amount || 0,
+    }));
+
+    res.json(breakdownData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // MARK: /transactions
 
 // get transactions based on filters
