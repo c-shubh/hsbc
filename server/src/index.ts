@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express from "express";
-import yup from "yup";
+import * as yup from "yup";
 import { transactionQuerySchema } from "./validation";
 
 const app = express();
@@ -14,18 +14,21 @@ app.get("/", (req, res) => {
   res.send("works");
 });
 
+// get transactions based on filters
 app.get("/transactions", async (req, res) => {
   try {
     const validatedQuery = await transactionQuerySchema.validate(req.query);
     const {
       page,
       limit,
-      startDate,
-      endDate,
-      category,
-      merchant,
+      step,
+      customer,
+      age,
+      gender,
       zipcodeOri,
+      merchant,
       zipMerchant,
+      category,
       minAmount,
       maxAmount,
       fraud,
@@ -34,12 +37,14 @@ app.get("/transactions", async (req, res) => {
     // db query filters
     const filters: any = {};
 
-    if (startDate) filters.date = { gte: new Date(startDate) };
-    if (endDate) filters.date = { ...filters.date, lte: new Date(endDate) };
-    if (category) filters.category = category;
-    if (merchant) filters.merchant = merchant;
+    if (step !== undefined) filters.step = step;
+    if (customer) filters.customer = customer;
+    if (age !== undefined) filters.age = age;
+    if (gender !== undefined) filters.gender = gender;
     if (zipcodeOri) filters.zipcodeOri = zipcodeOri;
+    if (merchant) filters.merchant = merchant;
     if (zipMerchant) filters.zipMerchant = zipMerchant;
+    if (category) filters.category = category;
     if (minAmount !== undefined) filters.amount = { gte: minAmount };
     if (maxAmount !== undefined)
       filters.amount = { ...filters.amount, lte: maxAmount };
