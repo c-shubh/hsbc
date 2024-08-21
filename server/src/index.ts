@@ -121,6 +121,141 @@ app.get("/analytics/overview", async (req, res) => {
   }
 });
 
+app.get("/analytics/customer-segmentation", async (req, res) => {
+  try {
+    const [ageSegmentation, genderSegmentation] = await db.$transaction([
+      // age groups
+      db.transaction.groupBy({
+        by: "age",
+        orderBy: { age: "asc" },
+        _count: {
+          customer: true,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      // by gender
+      db.transaction.groupBy({
+        by: "gender",
+        orderBy: { gender: "asc" },
+        _count: {
+          customer: true,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+    ]);
+
+    // spending tiers
+    const spendingSegmentation = await db.transaction
+      .groupBy({
+        by: ["customer"],
+        _sum: {
+          amount: true,
+        },
+      })
+      .then((customerSpending) => {
+        return customerSpending.reduce(
+          (acc, curr) => {
+            const spending = curr._sum.amount || 0;
+            let tier: "Low" | "Medium" | "High";
+
+            if (spending < 100) tier = "Low";
+            else if (spending < 500) tier = "Medium";
+            else tier = "High";
+
+            if (!acc[tier]) acc[tier] = { count: 0, totalAmount: 0 };
+            acc[tier].count += 1;
+            acc[tier].totalAmount += spending;
+
+            return acc;
+          },
+          {} as {
+            Low: { count: number; totalAmount: number };
+            Medium: { count: number; totalAmount: number };
+            High: { count: number; totalAmount: number };
+          }
+        );
+      });
+
+    const segmentationSummary = {
+      ageSegmentation: ageSegmentation.map((segment) => ({
+        age: segment.age,
+        customerCount: (segment._count! as any).customer,
+        totalAmount: (segment._sum! as any).amount || 0,
+      })),
+      spendingSegmentation,
+      genderSegmentation: genderSegmentation.map((segment) => ({
+        gender: segment.gender,
+        customerCount: (segment._count as any)!.customer,
+        totalAmount: (segment._sum as any)!.amount || 0,
+      })),
+    };
+
+    res.json(segmentationSummary);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/analytics/merchant-performance", async (req, res) => {
+  try {
+    const merchantsPerformance = await db.transaction.groupBy({
+      by: ["merchant"],
+      _count: {
+        id: true,
+      },
+      _avg: {
+        amount: true,
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    const fraudTransactions = await db.transaction.groupBy({
+      by: ["merchant"],
+      _count: {
+        fraud: true,
+      },
+      where: {
+        fraud: true,
+      },
+    });
+
+    const fraudMap = fraudTransactions.reduce((acc, item) => {
+      acc[item.merchant] = item._count.fraud;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const performanceData = merchantsPerformance.map((merchant) => {
+      const totalTransactionsCount = merchant._count.id;
+      const totalAmount = merchant._sum.amount || 0;
+      const averageAmount = merchant._avg.amount || 0;
+      const fraudTransactionsCount = fraudMap[merchant.merchant] || 0;
+      const fraudRate =
+        totalTransactionsCount > 0
+          ? (fraudTransactionsCount / totalTransactionsCount) * 100
+          : 0;
+
+      return {
+        merchant: merchant.merchant,
+        totalTransactionsCount,
+        totalAmount,
+        averageAmount,
+        fraudRate,
+      };
+    });
+
+    res.json(performanceData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // MARK: /transactions
 
 // get transactions based on filters
