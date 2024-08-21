@@ -14,11 +14,11 @@ import Logo from 'src/components/logo';
 import { useAuth } from 'src/hooks/useAuth';
 import { useRouter } from 'src/routes/hooks';
 import { bgGradient } from 'src/theme/css';
-import { login, sleep } from 'src/utils/api';
+import { login, signup } from 'src/utils/api';
 
 // ----------------------------------------------------------------------
 
-export default function LoginView() {
+export default function SignUpPage() {
   const theme = useTheme();
   const { account, setAccount } = useAuth();
   const router = useRouter();
@@ -27,12 +27,10 @@ export default function LoginView() {
   const [password, setPassword] = useState('');
 
   const handleClick = async () => {
-    const res = await login({ email, password });
+    const res = await signup({ email, password });
     if (res) {
       setAccount(res);
-      console.log(res);
-      await sleep(2000);
-      router.push('/');
+      router.push('/login');
     }
   };
 
@@ -105,12 +103,12 @@ export default function LoginView() {
             maxWidth: 420,
           }}
         >
-          <Typography variant="h4">Sign in</Typography>
+          <Typography variant="h4">Sign up</Typography>
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
-            Don’t have an account?
-            <Link href="/signup" variant="subtitle2" sx={{ ml: 0.5 }}>
-              Get started
+            Alerady have an accoutn?
+            <Link href="/login" variant="subtitle2" sx={{ ml: 0.5 }}>
+              Login
             </Link>
           </Typography>
 

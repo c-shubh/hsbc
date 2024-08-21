@@ -29,7 +29,7 @@ export default function AppConversionRates({ title, subheader, chart, ...other }
     plotOptions: {
       bar: {
         horizontal: true,
-        barHeight: '28%',
+        // barHeight: '30%',
         borderRadius: 2,
       },
     },

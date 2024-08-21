@@ -4,16 +4,8 @@
     "browser": true,
     "es2021": true
   },
-  "plugins": [
-    "perfectionist",
-    "unused-imports",
-    "prettier"
-  ],
-  "extends": [
-    "airbnb",
-    "airbnb/hooks",
-    "prettier"
-  ],
+  "plugins": ["unused-imports", "prettier"],
+  "extends": ["airbnb", "airbnb/hooks", "prettier"],
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
@@ -27,17 +19,8 @@
     },
     "import/resolver": {
       "alias": {
-        "map": [
-          [
-            "src",
-            "./src"
-          ]
-        ],
-        "extensions": [
-          ".js",
-          ".jsx",
-          ".json"
-        ]
+        "map": [["src", "./src"]],
+        "ensions": [".js", ".jsx", ".json"]
       }
     }
   },
@@ -63,6 +46,8 @@
     "import/prefer-default-export": 0,
     "react/function-component-definition": 0,
     "jsx-a11y/control-has-associated-label": 0,
+    "eslint-plugin-import/no-extraneous-dependencies": 0,
+    "import/no-extraneous-dependencies": ["off"],
     "react/jsx-no-useless-fragment": [
       1,
       {
@@ -93,84 +78,18 @@
       {
         "ignoreCase": false
       }
-    ],
+    ]
     // unused-imports
     // https://www.npmjs.com/package/eslint-plugin-unused-imports
-    "unused-imports/no-unused-imports": 1,
-    "unused-imports/no-unused-vars": [
-      0,
-      {
-        "vars": "all",
-        "varsIgnorePattern": "^_",
-        "args": "after-used",
-        "argsIgnorePattern": "^_"
-      }
-    ],
-    // perfectionist
-    // https://eslint-plugin-perfectionist.azat.io/
-    "perfectionist/sort-named-imports": [
-      1,
-      {
-        "order": "asc",
-        "type": "line-length"
-      }
-    ],
-    "perfectionist/sort-named-exports": [
-      1,
-      {
-        "order": "asc",
-        "type": "line-length"
-      }
-    ],
-    "perfectionist/sort-exports": [
-      1,
-      {
-        "order": "asc",
-        "type": "line-length"
-      }
-    ],
-    "perfectionist/sort-imports": [
-      1,
-      {
-        "order": "asc",
-        "type": "line-length",
-        "newlines-between": "always",
-        "groups": [
-          [
-            "builtin",
-            "external"
-          ],
-          "custom-mui",
-          "custom-routes",
-          "custom-hooks",
-          "custom-utils",
-          "internal",
-          "custom-components",
-          "custom-sections",
-          "custom-types",
-          [
-            "parent",
-            "sibling",
-            "index"
-          ],
-          "object",
-          "unknown"
-        ],
-        "custom-groups": {
-          "value": {
-            "custom-mui": "@mui/**",
-            "custom-routes": "src/routes/**",
-            "custom-hooks": "src/hooks/**",
-            "custom-utils": "src/utils/**",
-            "custom-components": "src/components/**",
-            "custom-sections": "src/sections/**",
-            "custom-types": "src/types/**"
-          }
-        },
-        "internal-pattern": [
-          "src/**"
-        ]
-      }
-    ]
+    // "unused-imports/no-unused-imports": 1,
+    // "unused-imports/no-unused-vars": [
+    //   0,
+    //   {
+    //     "vars": "all",
+    //     "varsIgnorePattern": "^_",
+    //     "args": "after-used",
+    //     "argsIgnorePattern": "^_"
+    //   }
+    // ]
   }
 }
