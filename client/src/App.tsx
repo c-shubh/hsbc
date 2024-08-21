@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import Home from "./Home";
+import Navbar from "./Navbar";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ export default function App() {
     <>
       <CssBaseline />
       <ToastContainer />
+      <Navbar />
       <RouterProvider router={router} />;
     </>
   );
