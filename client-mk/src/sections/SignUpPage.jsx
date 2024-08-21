@@ -72,7 +72,7 @@ export default function SignUpPage() {
         color="inherit"
         onClick={handleClick}
       >
-        Login
+        Sign up
       </LoadingButton>
     </>
   );
@@ -106,7 +106,7 @@ export default function SignUpPage() {
           <Typography variant="h4">Sign up</Typography>
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
-            Alerady have an accoutn?
+            Already have an account?
             <Link href="/login" variant="subtitle2" sx={{ ml: 0.5 }}>
               Login
             </Link>
