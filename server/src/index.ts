@@ -1,8 +1,12 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express from "express";
 import * as yup from "yup";
-import { transactionQuerySchema } from "./validation";
+import {
+  createTransactionSchema,
+  transactionIdSchema,
+  transactionQuerySchema,
+} from "./validation";
 
 const app = express();
 app.use(express.json());
@@ -61,6 +65,52 @@ app.get("/transactions", async (req, res) => {
   } catch (err) {
     if (err instanceof yup.ValidationError) {
       return res.status(400).json({ error: err.errors });
+    }
+
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// create new transaction
+app.post("/transactions", async (req, res) => {
+  try {
+    const validatedBody = await createTransactionSchema.validate(req.body);
+    const newTransaction = await db.transaction.create({
+      data: validatedBody,
+    });
+    res.status(201).json(newTransaction);
+  } catch (err) {
+    if (err instanceof yup.ValidationError) {
+      return res.status(400).json({ error: err.errors });
+    }
+
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// delete transaction
+app.delete("/transactions/:id", async (req, res) => {
+  try {
+    const { id } = await transactionIdSchema.validate({
+      id: Number(req.params.id),
+    });
+    const deletedTransaction = await db.transaction.delete({
+      where: { id: Number(id) },
+    });
+    res.json(deletedTransaction);
+  } catch (err) {
+    if (err instanceof yup.ValidationError) {
+      return res.status(400).json({ error: err.errors });
+    }
+
+    // transaction was not found
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      return res.status(404).json({ error: "Transaction not found" });
     }
 
     console.error(err);
